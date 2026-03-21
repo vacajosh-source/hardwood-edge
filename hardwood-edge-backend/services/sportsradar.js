@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 const BASE_URL = 'https://api.sportradar.com/nba/trial/v8/en';
-const API_KEY = process.env.SPORTRADAR_API_KEY;
+const API_KEY  = process.env.SPORTRADAR_API_KEY;
 
 async function get(endpoint) {
   try {
@@ -16,25 +16,30 @@ async function get(endpoint) {
   }
 }
 
+// All NBA teams grouped by conference/division
 async function getTeams() {
   return get('/league/hierarchy.json');
 }
 
-async function getTeamRoster(teamId) {
-  return get(`/teams/${teamId}/profile.json`);
+// Team seasonal stats — returns both player stats AND opponent (defensive) stats
+async function getTeamSeasonalStats(teamId, season = '2024', type = 'REG') {
+  return get(`/seasons/${season}/${type}/teams/${teamId}/statistics.json`);
 }
 
-async function getTeamDefense(teamId) {
-  return get(`/teams/${teamId}/opponents.json`);
+// Full season schedule — populates the games table
+async function getSeasonSchedule(season = '2024', type = 'REG') {
+  return get(`/seasons/${season}/${type}/schedule.json`);
 }
 
-async function getLeaguePlayerStats(season = '2024') {
-  return get(`/seasons/${season}/REG/players/statistics.json`);
+// Daily injuries
+async function getDailyInjuries() {
+  const today = new Date().toISOString().split('T')[0].replace(/-/g, '/');
+  return get(`/league/${today}/injuries.json`);
 }
 
 module.exports = {
   getTeams,
-  getTeamRoster,
-  getTeamDefense,
-  getLeaguePlayerStats
+  getTeamSeasonalStats,
+  getSeasonSchedule,
+  getDailyInjuries
 };
